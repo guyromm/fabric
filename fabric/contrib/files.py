@@ -13,6 +13,7 @@ from fabric.context_managers import hide, settings
 from fabric.operations import put, run, sudo
 from fabric.state import env
 from fabric.utils import abort, apply_lcwd
+import tempfile
 
 
 def exists(path, use_sudo=False, verbose=False):
@@ -168,9 +169,12 @@ def upload_template(filename, destination, context=None, use_jinja=False,
     if six.PY3 is True and isinstance(text, bytes):
         text = text.decode('utf-8')
 
+    tf = tempfile.NamedTemporaryFile(mode='w',delete=False)
+    tf.write(text) ; tf.close()
+
     # Upload the file.
     return put(
-        local_path=six.StringIO(text),
+        local_path=tf.name,
         remote_path=destination,
         use_sudo=use_sudo,
         mirror_local_mode=mirror_local_mode,
