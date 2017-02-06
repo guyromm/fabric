@@ -169,18 +169,20 @@ def upload_template(filename, destination, context=None, use_jinja=False,
     if six.PY3 is True and isinstance(text, bytes):
         text = text.decode('utf-8')
 
-    tf = tempfile.NamedTemporaryFile(mode='w',delete=False)
-    tf.write(text) ; tf.close()
 
-    # Upload the file.
-    return put(
-        local_path=tf.name,
-        remote_path=destination,
-        use_sudo=use_sudo,
-        mirror_local_mode=mirror_local_mode,
-        mode=mode,
-        temp_dir=temp_dir
-    )
+
+    with tempfile.NamedTemporaryFile(mode='w', delete=True) as tf:
+        tf.write(text)
+        # Upload the file.
+        rt = put(
+            local_path=tf.name,
+            remote_path=destination,
+            use_sudo=use_sudo,
+            mirror_local_mode=mirror_local_mode,
+            mode=mode,
+            temp_dir=temp_dir
+        )
+    return rt
 
 
 def sed(filename, before, after, limit='', use_sudo=False, backup='.bak',
