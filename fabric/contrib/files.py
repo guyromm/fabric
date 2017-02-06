@@ -173,6 +173,8 @@ def upload_template(filename, destination, context=None, use_jinja=False,
 
     with tempfile.NamedTemporaryFile(mode='w', delete=True) as tf:
         tf.write(text)
+        # will make the file readable by put() on the next line. since the file isn't closed yet at this point, and we would like to a. avoid keeping the file lying around and b. deleting it ourselves naively, rather rely on tempfile's delete functionality.
+        tf.flush()
         # Upload the file.
         rt = put(
             local_path=tf.name,
